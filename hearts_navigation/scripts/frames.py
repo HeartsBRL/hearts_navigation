@@ -24,7 +24,7 @@ def set_target(target):
     ori = [float(target.transform.rotation.x),
            float(target.transform.rotation.y),
            float(target.transform.rotation.z),
-           float(target.transform.rotation.w)] 
+           float(target.transform.rotation.w)]
     rospy.set_param('target_pos', pos)
     rospy.set_param('target_ori', ori)
 
@@ -70,8 +70,6 @@ targ.transform.rotation = Quaternion(0,0,0,1)
 
 set_target(targ)
 rospy.sleep(1)
-targ.transform.translation.x = 0.05
-#targ.transform.rotation = Quaternion(0,0,0,1)
 
 #frames are published at 1Hz
 r = rospy.Rate(1)
@@ -87,15 +85,5 @@ while not rospy.is_shutdown():
     br.sendTransform(pos,ori,rospy.Time.now(),"/target","/erl_frame")
     r.sleep()
 
-    pos = [targ.transform.translation.x,
-           targ.transform.translation.y,
-           targ.transform.translation.z]
-    #rot = tf.transformations.quaternion_from_euler(0,0,0)
-    ori = [targ.transform.rotation.x,
-           targ.transform.rotation.y,
-           targ.transform.rotation.z,
-           targ.transform.rotation.w] 
-    br.sendTransform(pos,ori,rospy.Time.now(),"/hearts_grip","/arm_tool_link")
 
-#if __name__ == '__main__':    
-
+#if __name__ == '__main__':

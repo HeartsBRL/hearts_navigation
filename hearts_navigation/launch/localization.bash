@@ -9,7 +9,7 @@ else
     sleep 2
     rosservice call /pal_map_manager/change_map "input: '$1'"
     sleep 2
-    rosrun rviz rviz -d /home/turtlebot/tb_ws/src/tiago_navigation/tiago_2dnav/config/rviz/navigation_public_sim.rviz
+    rosrun rviz rviz -d ~/workspaces/hearts_erl/src/hearts_navigation/hearts_navigation/config/navigation_public_sim.rviz
 fi
 
 echo "$0 complete"
