@@ -78,7 +78,7 @@ r = rospy.Rate(1)
 while not rospy.is_shutdown():
     pos = rospy.get_param('erl_pos')
     ori = rospy.get_param('erl_ori')
-    br.sendTransform(pos,ori,rospy.Time.now(),"/erl_frame","/odom")
+    br.sendTransform(pos,ori,rospy.Time.now(),"/erl_frame","/map")
 
     pos = rospy.get_param('target_pos')
     ori = rospy.get_param('target_ori')
