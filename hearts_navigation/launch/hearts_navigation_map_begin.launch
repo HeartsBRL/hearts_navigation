@@ -1,6 +1,7 @@
 <launch>
     <node name="set_nav_mode" pkg="rosservice" type="rosservice" args="call /pal_navigation_sm 'input: MAP'" output="screen" />
-    
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find hearts_navigation)/config/navigation_public_sim.rviz" />
+
     <!-- exploration not currently working, consider using frontier_exploration package 
          (http://wiki.ros.org/frontier_exploration) instead, for now mapping must be 
          performed manually -->
