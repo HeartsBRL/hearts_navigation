@@ -27,7 +27,7 @@ class Navigator():
 
         rospy.Subscriber('hearts/navigation/goal', Pose2D, self.goalCallback)
         rospy.Subscriber('hearts/navigation/stop', String, self.stopCallback)
-        
+
     def goalCallback(self, data):
 
         rospy.loginfo("Navigator: goal Callback")
@@ -44,7 +44,7 @@ class Navigator():
 
             # Convert Pose2D to PoseStamped
             self.t = PoseStamped()
-            self.t.header.frame_id = "/map"
+            self.t.header.frame_id = "/erl_frame"
             self.t.pose.position.x = data.x
             self.t.pose.position.y = data.y
             #t.pose.orientation.w = data.theta
@@ -68,7 +68,7 @@ class Navigator():
 
         if length_status > 0:
             status = data.status_list[length_status-1].status
-            
+
             if status == 4 or status == 5 or status == 9:
                 status_msg = 'Fail'
                 self.isNavigating = False
@@ -82,12 +82,12 @@ class Navigator():
                 status_msg = 'Active'
                 self.isNavigating = True
 
-            if self.previous_state != status_msg: 
+            if self.previous_state != status_msg:
                 self.pubStatus.publish(status_msg)
                 self.previous_state = status_msg
                 rospy.loginfo('status: ' + str(status))
 
-                    
+
 
 if __name__ == '__main__':
 	rospy.init_node('Navigator', anonymous=True)

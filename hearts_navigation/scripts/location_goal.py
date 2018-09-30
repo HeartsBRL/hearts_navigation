@@ -23,7 +23,7 @@ class Location():
         #self.write_dict()
 
 
-       
+
         # Set up publishers
         self.pubCurrent = rospy.Publisher('hearts/navigation/pose/location', String, queue_size=10)
         self.pubGoal = rospy.Publisher('/hearts/navigation/goal', Pose2D, queue_size=10)
@@ -49,7 +49,7 @@ class Location():
 
         with open(json_name) as json_data:
             self.dict = json.load(json_data)
-            
+
         rospy.loginfo("using locations file: " + json_name)
 
     def write_dict(self, updatedLocations):
@@ -72,7 +72,7 @@ class Location():
 
 
         p = {
-            data: 
+            data:
                 {
                 "header": {
                     "seq": 0,
@@ -80,7 +80,7 @@ class Location():
                         "secs": 0,
                         "nsecs": 0
                     },
-                    "frame_id": "/map"
+                    "frame_id": "/erl_frame"
                 },
                 "pose": {
                     "position": {
@@ -107,7 +107,7 @@ class Location():
             with io.open(self.PATH, 'w') as db_file:
                 db_file.write(unicode(json.dumps({})))
                 LocationsCurrent = p
-        
+
         self.write_dict(LocationsCurrent)
 
 
@@ -120,7 +120,7 @@ class Location():
     # When a location is published, turn it in to a pose goal
     def locGoal_callback(self, data):
         print data.data
-        
+
         pose = self.find_pose(data.data)
         if not pose is None:
             self.current_goal = data.data
@@ -128,7 +128,7 @@ class Location():
         else:
             self.current_goal = None
             print "invalid goal location '" + data.data + "'"
-            
+
     # When a pose is published, convert it to a location value
     def currentPose_callback(self, data):
         print data.data

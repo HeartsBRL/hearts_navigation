@@ -12,7 +12,7 @@ from std_msgs.msg import String
 
 #set erl_frame coords to be tiago's current location
 def frame_change(x):
-    (pos,ori) = listener.lookupTransform("/odom","/base_footprint",rospy.Time())
+    (pos,ori) = listener.lookupTransform("/map","/base_footprint",rospy.Time())
     rospy.set_param('erl_pos', pos)
     rospy.set_param('erl_ori', ori)
 
