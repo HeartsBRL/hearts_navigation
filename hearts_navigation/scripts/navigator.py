@@ -15,7 +15,7 @@ class Navigator():
     def __init__(self):
 
         self.isNavigating = False
-        self.statusNeeded = 0 #TODO consider removing, seriously
+        #self.statusNeeded = 0 #TODO consider removing, seriously
         self.currentGoal = Pose2D()
         self.lastGoal = Pose2D()
 
@@ -44,7 +44,7 @@ class Navigator():
             rospy.loginfo("Navigator: currently navigating, can't continue at the moment.")
         else:
             rospy.loginfo("Navigator: sending new goal pose")
-
+            self.isNavigating = True
             # @TODO add some form of checking to data:
 
             self.currentGoal = data
@@ -67,20 +67,16 @@ class Navigator():
             rospy.loginfo(self.goal)
 
             self.moveAC.send_goal(self.goal)
-            rospy.loginfo("spam")
-
-            self.wait = self.moveAC.wait_for_result(timeout=rospy.Duration(5))
-            rospy.loginfo("spam")
-
-            #if self.wait:
-            rospy.loginfo("spam")
-            print(self.moveAC.get_result())
-            self.statusNeeded = 1
-            #else:
-            rospy.loginfo("maps")
-            #self.pubGoal.publish(self.goal)
-            #self.isNavigating = True TODO UNCOMMENT THIS FOR THE LOVE OF GOD
-
+            print("move goal sent")
+            #TODO change duration for real thing
+            self.wait_result = self.moveAC.wait_for_result(timeout=rospy.Duration(5))
+            print("wait done")
+            print self.wait_result
+            if self.wait_result:
+                print(self.moveAC.get_result())
+                #self.statusNeeded = 1
+            self.isNavigating = False
+ 
     def stopCallback(self, data):
 
         if (data.data):
@@ -88,38 +84,38 @@ class Navigator():
 
     def StatusCallback(self, data):
         #rospy.loginfo("Naughty naughty")
-        if self.statusNeeded == 1:
+        if True: #self.statusNeeded == 1:
             length_status = len(data.status_list)
-
+            
             if length_status > 0:
                 status = data.status_list[length_status-1].status
-
+                status_msg = String()
                 if status == 4 or status == 5 or status == 9:
-                    status_msg = 'Fail'
+                    status_msg.data = 'Fail'
                     self.isNavigating = False
                 elif status==3:
-                    status_msg = 'Success'
+                    status_msg.data = 'Success'
                     self.lastGoal = self.currentGoal
                     self.currentGoal = Pose2D()
                     self.isNavigating = False
                     self.repeat = False
                 elif status==1:
-                    status_msg = 'Active'
+                    status_msg.data = 'Active'
                     rospy.loginfo("Navigating is active, so it is")
                     self.isNavigating = True
                 else:
                     rospy.loginfo("I No Naaaffin")
 
-                if self.previous_state != status_msg:
+                if self.previous_state != status_msg.data:
                     self.pubStatus.publish(status_msg)
-                    self.previous_state = status_msg
+                    self.previous_state = status_msg.data
                     rospy.loginfo('status: ' + str(status))
             self.statusNeeded = 0
 
 
 
 if __name__ == '__main__':
-	rospy.init_node('Navigator', anonymous=False)
-	rospy.loginfo("Navigator has started")
-	n = Navigator()
-	rospy.spin()
+        rospy.init_node('Navigator', anonymous=False)
+        rospy.loginfo("Navigator has started")
+        n = Navigator()
+        rospy.spin()
