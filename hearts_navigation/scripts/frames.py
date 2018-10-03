@@ -72,7 +72,7 @@ set_target(targ)
 rospy.sleep(1)
 
 #frames are published at 1Hz
-r = rospy.Rate(5)
+r = rospy.Rate(10)
 
 #continuously publish the frames so that other tf functions can use them
 while not rospy.is_shutdown():

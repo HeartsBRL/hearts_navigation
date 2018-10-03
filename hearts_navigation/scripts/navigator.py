@@ -30,7 +30,7 @@ class Navigator():
 
         self.previous_state = ""
         self.t = PoseStamped()
-        #rospy.Subscriber('move_base/status', GoalStatusArray, self.StatusCallback)   # Get status of plan
+        rospy.Subscriber('move_base/status', GoalStatusArray, self.StatusCallback)   # Get status of plan
 
         rospy.Subscriber('hearts/navigation/goal', Pose2D, self.goalCallback)
         rospy.Subscriber('hearts/navigation/stop', String, self.stopCallback)
@@ -69,14 +69,15 @@ class Navigator():
             self.moveAC.send_goal(self.goal)
             print("move goal sent")
             #TODO change duration for real thing
-            self.wait_result = self.moveAC.wait_for_result(timeout=rospy.Duration(5))
+            self.wait_result = self.moveAC.wait_for_result(timeout=rospy.Duration(60))
             print("wait done")
             print self.wait_result
             if self.wait_result:
                 print(self.moveAC.get_result())
+                print("yp")
                 #self.statusNeeded = 1
             self.isNavigating = False
- 
+
     def stopCallback(self, data):
 
         if (data.data):
@@ -86,7 +87,7 @@ class Navigator():
         #rospy.loginfo("Naughty naughty")
         if True: #self.statusNeeded == 1:
             length_status = len(data.status_list)
-            
+
             if length_status > 0:
                 status = data.status_list[length_status-1].status
                 status_msg = String()
@@ -103,8 +104,9 @@ class Navigator():
                     status_msg.data = 'Active'
                     rospy.loginfo("Navigating is active, so it is")
                     self.isNavigating = True
-                else:
-                    rospy.loginfo("I No Naaaffin")
+                #else:
+                    #rospy.loginfo("I No Naaaffin")
+
 
                 if self.previous_state != status_msg.data:
                     self.pubStatus.publish(status_msg)
