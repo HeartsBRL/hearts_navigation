@@ -17,6 +17,7 @@ class Navigator():
         self.lastGoal = Pose2D()
 
         self.pubGoal = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=1)
+        self.cancel_move = rospy.Publisher("move_base/cancel", GoalID, queue_size=1)
 
         self.pubStatus = rospy.Publisher('/hearts/navigation/status', String, queue_size=1)
         self.pubPose = rospy.Publisher('/hearts/navigation/current', String, queue_size=1)
@@ -24,7 +25,8 @@ class Navigator():
         self.previous_state = ""
         self.t = PoseStamped()
         rospy.Subscriber('move_base/status', GoalStatusArray, self.StatusCallback)   # Get status of plan
-
+        
+        rospy.Subscriber('hearts/navigation/goal_shortcut', PoseStamped, self.goalCallback2)
         rospy.Subscriber('hearts/navigation/goal', Pose2D, self.goalCallback)
         rospy.Subscriber('hearts/navigation/stop', String, self.stopCallback)
         
@@ -57,11 +59,26 @@ class Navigator():
             rospy.loginfo(str(data.x)+ str(data.y)+ str(data.theta))
             self.pubGoal.publish(self.t)
             self.isNavigating = True
+            
+    def goalCallback2(self, data):
+
+        rospy.loginfo("Navigator: goal Callback (shortcut)")
+
+        # Make sure the robot isn't already trying to go somewhere
+        if(self.isNavigating == True):
+            rospy.loginfo("Navigator: currently navigating, can't continue at the moment.")
+        else:
+            rospy.loginfo("Navigator: sending new goal pose")
+
+            self.pubGoal.publish(data)
+            self.isNavigating = True
 
     def stopCallback(self, data):
-
-        if (data.data):
-            rospy.loginfo("Navigator: Stop Callback")
+        #clear all navigation goals
+        msg = GoalID()
+        self.cancel_move.publish(msg)
+        self.isNavigating = False
+        rospy.loginfo("Cleared navigation stack")
 
     def StatusCallback(self, data):
         length_status = len(data.status_list)
