@@ -80,7 +80,7 @@ class Location():
                         "secs": 0,
                         "nsecs": 0
                     },
-                    "frame_id": "/erl_frame"
+                    "frame_id": "/map"
                 },
                 "pose": {
                     "position": {

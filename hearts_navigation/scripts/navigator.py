@@ -27,6 +27,7 @@ class Navigator():
 
         self.pubStatus = rospy.Publisher('/hearts/navigation/status', String, queue_size=1)
         self.pubPose = rospy.Publisher('/hearts/navigation/current', String, queue_size=1)
+        self.pubStop = rospy.Publisher('/move_base/cancel', GoalID, queue_size=1)
 
         self.previous_state = ""
         self.t = PoseStamped()
@@ -51,7 +52,7 @@ class Navigator():
 
             # Convert Pose2D to PoseStamped
             self.t = PoseStamped()
-            self.t.header.frame_id = "/erl_frame"
+            self.t.header.frame_id = "/map"
             self.t.pose.position.x = data.x
             self.t.pose.position.y = data.y
             #t.pose.orientation.w = data.theta
@@ -82,6 +83,9 @@ class Navigator():
 
         if (data.data):
             rospy.loginfo("Navigator: Stop Callback")
+            msg = GoalID()
+            self.pubStop.publish(msg)
+
 
     def StatusCallback(self, data):
         #rospy.loginfo("Naughty naughty")
@@ -102,7 +106,7 @@ class Navigator():
                     self.repeat = False
                 elif status==1:
                     status_msg.data = 'Active'
-                    rospy.loginfo("Navigating is active, so it is")
+                    #rospy.loginfo("Navigating is active, so it is")
                     self.isNavigating = True
                 #else:
                     #rospy.loginfo("I No Naaaffin")
