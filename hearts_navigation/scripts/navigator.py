@@ -19,6 +19,10 @@ class Navigator():
         self.currentGoal = Pose2D()
         self.lastGoal = Pose2D()
 
+
+        self.pubGoal = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=1)
+        self.cancel_move = rospy.Publisher("move_base/cancel", GoalID, queue_size=1)
+
         self.moveAC = SimpleActionClient('move_base', MoveBaseAction)
         rospy.loginfo("Waiting for Move Base Action Server")
         self.moveAC.wait_for_server()
@@ -33,6 +37,7 @@ class Navigator():
         self.t = PoseStamped()
         rospy.Subscriber('move_base/status', GoalStatusArray, self.StatusCallback)   # Get status of plan
 
+        rospy.Subscriber('hearts/navigation/goal_shortcut', PoseStamped, self.goalCallback2)
         rospy.Subscriber('hearts/navigation/goal', Pose2D, self.goalCallback)
         rospy.Subscriber('hearts/navigation/stop', String, self.stopCallback)
 
@@ -63,29 +68,45 @@ class Navigator():
             self.t.pose.orientation.w = quaternion[3]
             # = createQuaternionMsgFromYaw(data.theta)
             rospy.loginfo(str(data.x)+ str(data.y)+ str(data.theta))
-            self.goal = MoveBaseGoal()
-            self.goal.target_pose = self.t
-            rospy.loginfo(self.goal)
 
-            self.moveAC.send_goal(self.goal)
-            print("move goal sent")
-            #TODO change duration for real thing
-            self.wait_result = self.moveAC.wait_for_result(timeout=rospy.Duration(60))
-            print("wait done")
-            print self.wait_result
-            if self.wait_result:
-                print(self.moveAC.get_result())
-                print("yp")
-                #self.statusNeeded = 1
-            self.isNavigating = False
+            self.pubGoal.publish(self.t)
+            self.isNavigating = True
+
+    # def goalCallback2(self, data):
+    #
+    #     self.goal = MoveBaseGoal()
+    #     self.goal.target_pose = self.t
+    #     rospy.loginfo(self.goal)
+    #
+    #     self.moveAC.send_goal(self.goal)
+    #     print("move goal sent")
+    #     #TODO change duration for real thing
+    #     self.wait_result = self.moveAC.wait_for_result(timeout=rospy.Duration(60))
+    #     print("wait done")
+    #     print self.wait_result
+    #     if self.wait_result:
+    #         print(self.moveAC.get_result())
+    #         print("yp")
+    #         #self.statusNeeded = 1
+    #     self.isNavigating = False
+    #
+    #     rospy.loginfo("Navigator: goal Callback (shortcut)")
+    #
+    #     # Make sure the robot isn't already trying to go somewhere
+    #     if(self.isNavigating == True):
+    #         rospy.loginfo("Navigator: currently navigating, can't continue at the moment.")
+    #     else:
+    #         rospy.loginfo("Navigator: sending new goal pose")
+    #
+    #         self.pubGoal.publish(data)
+    #         self.isNavigating = True
 
     def stopCallback(self, data):
-
-        if (data.data):
-            rospy.loginfo("Navigator: Stop Callback")
-            msg = GoalID()
-            self.pubStop.publish(msg)
-
+        #clear all navigation goals
+        msg = GoalID()
+        self.cancel_move.publish(msg)
+        self.isNavigating = False
+        rospy.loginfo("Cleared navigation stack")
 
     def StatusCallback(self, data):
         #rospy.loginfo("Naughty naughty")
