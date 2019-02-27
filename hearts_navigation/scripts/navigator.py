@@ -37,7 +37,7 @@ class Navigator():
         self.t = PoseStamped()
         rospy.Subscriber('move_base/status', GoalStatusArray, self.StatusCallback)   # Get status of plan
 
-        rospy.Subscriber('hearts/navigation/goal_shortcut', PoseStamped, self.goalCallback2)
+        #rospy.Subscriber('hearts/navigation/goal_shortcut', PoseStamped, self.goalCallback2)
         rospy.Subscriber('hearts/navigation/goal', Pose2D, self.goalCallback)
         rospy.Subscriber('hearts/navigation/stop', String, self.stopCallback)
 
