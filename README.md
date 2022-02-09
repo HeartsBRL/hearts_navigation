@@ -15,5 +15,4 @@ However, this are screenshots and it is highly possible that this might have aff
 
 ![WhatsApp Image 2022-02-09 at 17 24 45 (2)](https://user-images.githubusercontent.com/50763982/153255968-09a365f3-4502-4649-b500-9fd764688fe4.jpeg)
 ![WhatsApp Image 2022-02-09 at 17 24 45 (1)](https://user-images.githubusercontent.com/50763982/153256130-ae73258f-c2f6-486b-b885-498516c64437.jpeg)
-![WhatsApp Image 2022-02-09 at 17 24 45](https://user-images.githubusercontent.com/50763982/153256157-3225d42e-b0d1-4ebe-97c6-9c7783624a96.jpeg)
 
