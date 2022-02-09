@@ -18,7 +18,7 @@ For this system we are using Melodic however, it will also works on Noetic
 * jetpack 4.6
 * ROS Melodic (Installed using [this link](https://www.stereolabs.com/blog/ros-and-nvidia-jetson-nano/) and taking reference from [official installation guide](http://wiki.ros.org/melodic/Installation/Ubuntu)
 
-**NOTE: during installation of any of the software, if it is asked to install opencv just find opencv4 in jetson nano and change path to the same. Also refer to [this](https://github.com/ros-perception/vision_opencv/issues/345) repository** 
+**NOTE: during installation of any of the software, if it is asked to install opencv just find opencv4 in jetson nano and change path to the same. Also refer to [this](https://github.com/ros-perception/vision_opencv/issues/345) repository for more information** 
 
 ## Performance
 
