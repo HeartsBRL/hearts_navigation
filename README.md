@@ -1,8 +1,9 @@
 # hearts_navigation
 Navigation and SLAM based packaged
 
-RTAB MAP on Jetson nano performance: 
+## RTAB MAP on Jetson nano performance: 
 
+### FPS on RVIZ 
 The frame rate usually fluctuates between 19 and 26 and best it can get upto is 30 
 ![Screenshot from 2022-02-09 17-12-48](https://user-images.githubusercontent.com/50763982/153254181-3aea52a3-00ff-4d66-9903-8ed422c98ad4.png)
 ![Screenshot from 2022-02-09 17-13-13](https://user-images.githubusercontent.com/50763982/153254193-1a1f8318-372a-4b1c-968a-eb2450a584a7.png)
@@ -16,3 +17,6 @@ However, this are screenshots and it is highly possible that this might have aff
 ![WhatsApp Image 2022-02-09 at 17 24 45 (2)](https://user-images.githubusercontent.com/50763982/153255968-09a365f3-4502-4649-b500-9fd764688fe4.jpeg)
 ![WhatsApp Image 2022-02-09 at 17 24 45 (1)](https://user-images.githubusercontent.com/50763982/153256130-ae73258f-c2f6-486b-b885-498516c64437.jpeg)
 
+### GPU and CPU performance 
+
+GPU and CPU of jetson nano was monitored during this mapping to get this results. [jtop](https://github.com/rbonghi/jetson_stats.git) was used to monitor this results. 
