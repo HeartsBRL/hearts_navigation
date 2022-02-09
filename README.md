@@ -1,7 +1,6 @@
-# hearts_navigation
-Navigation and SLAM based packaged
+# RTAB MAP on Jetson nano: 
 
-## RTAB MAP on Jetson nano performance: 
+## Performance
 
 ### FPS on RVIZ 
 The frame rate usually fluctuates between 19 and 26 and best it can get upto is 30 
@@ -33,3 +32,9 @@ In both of the cases the camera was moved and kept stationary to analyse behavio
 
 To specify the results, CPU was almost 100% optimized through out the run (all the 4 cores) and there are fluctuations in GPU usage. 
 For this project, we are using cuda optimized opencv4 which comes with jetpack 4.5. RTAB MAP and realsense sdk ROS wrapper which are two of the most image processing focused packages in this whole system. They utilize this version of opencv to process information. This is one of the reason we are getting better reasons as compared to pi. Furthermore, this also explains fluctuations in GPU usage.
+
+### Future objective analysis
+
+This system can be tested on a turtlebot waffle with robot on chair controller, with jtop active. 
+
+The same can be done on A1
