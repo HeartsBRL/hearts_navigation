@@ -4,7 +4,7 @@
 
 This system is testing using the following hardware: 
 
-⋅⋅* aloha
+* aloha
 
 ## Performance
 
