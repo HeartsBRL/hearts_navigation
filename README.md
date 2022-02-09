@@ -23,5 +23,10 @@ GPU and CPU of jetson nano was monitored during this mapping to get this results
 
 
 
-https://user-images.githubusercontent.com/50763982/153261059-c1636c22-22f0-4e36-b147-a97e8173c313.mp4
+https://user-images.githubusercontent.com/50763982/153261807-df0d8e17-2bf6-43e7-95d9-dcdb13e31dc6.mp4
 
+
+
+https://user-images.githubusercontent.com/50763982/153261818-c895b328-a9f2-4d08-929c-b52ebf2af39c.mp4
+
+In both of the cases the camera was moved and kept stationary to analyse behaviour of the system in dynamic as well as stationary state.
