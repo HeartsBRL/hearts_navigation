@@ -30,3 +30,6 @@ https://user-images.githubusercontent.com/50763982/153261807-df0d8e17-2bf6-43e7-
 https://user-images.githubusercontent.com/50763982/153261818-c895b328-a9f2-4d08-929c-b52ebf2af39c.mp4
 
 In both of the cases the camera was moved and kept stationary to analyse behaviour of the system in dynamic as well as stationary state.
+
+To specify the results, CPU was almost 100% optimized through out the run (all the 4 cores) and there are fluctuations in GPU usage. 
+For this project, we are using cuda optimized opencv4 which comes with jetpack 4.5. RTAB MAP and realsense sdk ROS wrapper which are two of the most image processing focused packages in this whole system. They utilize this version of opencv to process information. This is one of the reason we are getting better reasons as compared to pi. Furthermore, this also explains fluctuations in GPU usage.
