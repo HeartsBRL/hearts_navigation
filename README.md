@@ -1,5 +1,11 @@
 # RTAB MAP on Jetson nano: 
 
+## Requirements 
+
+This system is testing using the following hardware: 
+
+''*
+
 ## Performance
 
 ### FPS on RVIZ 
