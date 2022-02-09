@@ -20,3 +20,8 @@ However, this are screenshots and it is highly possible that this might have aff
 ### GPU and CPU performance 
 
 GPU and CPU of jetson nano was monitored during this mapping to get this results. [jtop](https://github.com/rbonghi/jetson_stats.git) was used to monitor this results. 
+
+
+
+https://user-images.githubusercontent.com/50763982/153261059-c1636c22-22f0-4e36-b147-a97e8173c313.mp4
+
