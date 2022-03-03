@@ -360,6 +360,56 @@ I have just installed rtabmap using binary file because i don't see any reason t
 $ sudo apt-get install ros-melodic-rtabmap-ros
 ```
 
+You can also download an additional file for showing gpu optimization which you can find [here](https://github.com/jetsonhacks/gpuGraphTX). 
+
+## Usage
+
+For the purpose of this project, I have modified [hand held mapping](http://wiki.ros.org/rtabmap_ros/Tutorials/HandHeldMapping) tutorial. 
+
+**NOTE**
+
+Do not use RTABMAP viewer in jetson nano, use RVIZ instead.
+
+There are 3 packages that you need to run for using RTABMAP in the following order:
+
+* Realsense ROS wrapper
+* IMU filter madgwick
+* RTABMAP
+
+### Install IMU madwick filter:
+
+```
+$ sudo apt-get install ros-melodic-imu-filter-madgwick
+```
+
+Run the following commands in different terminals
+
+```
+$ roslaunch realsense2_camera rs_camera.launch \
+    align_depth:=true \
+    unite_imu_method:="linear_interpolation" \
+    enable_gyro:=true \
+     enable_accel:=true
+
+$ rosrun imu_filter_madgwick imu_filter_node \
+    _use_mag:=false \
+    _publish_tf:=false \
+    _world_frame:="enu" \
+    /imu/data_raw:=/camera/imu \
+    /imu/data:=/rtabmap/imu
+
+ $ roslaunch rtabmap_ros rtabmap.launch \
+    rtabmap_args:="--delete_db_on_start --Optimizer/GravitySigma 0.3" \
+    depth_topic:=/camera/aligned_depth_to_color/image_raw \
+    rgb_topic:=/camera/color/image_raw \
+    camera_info_topic:=/camera/color/camera_info \
+    approx_sync:=false \
+    wait_imu_to_init:=true \
+    imu_topic:=/rtabmap/imu  rtabmapviz:=false  rviz:=true
+```
+Once the rviz is on select Map cloud and map graph. In the map cloud download map to load all the points in the rviz. It would show some error initially but after sometime it should load. 
+
+If you want to not start mapping with fresh map remove ``` rtabmap_args:="--delete_db_on_start --Optimizer/GravitySigma 0.3" ```
 ## Performance
 
 ### FPS on RVIZ 
