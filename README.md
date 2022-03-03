@@ -1,5 +1,14 @@
 # RTAB MAP on Jetson nano: 
 
+The idea behind this approach is that RTABmap and realsense sdk both of them use opencv. If it is possible to optimize opencv with cuda then we can use GPU on the jetson nano board to improve performance of the algorithm. RTABMAP also use PLC which can also be CUDA optimized however that is future works for this project.
+
+In order to acieve this, we need to achieve following goals, which are explained in detail in this document:
+
+* Building Opencv with CUDA on source
+* Building Realsense SDK on source (this was tested on the platform which is described in the **hardware**.
+* Building image transport and cv bridge ros package from source.
+
+
 ## Requirements 
 
 **Hardware**
@@ -12,13 +21,205 @@
 
 **Software**
 
-For this system we are using Melodic however, it will also works on Noetic
-
 * tegra210 OS (latest till building this project [follow this link](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit) to download latest os for nano.
 * jetpack 4.6
-* ROS Melodic (Installed using [this link](https://www.stereolabs.com/blog/ros-and-nvidia-jetson-nano/) and taking reference from [official installation guide](http://wiki.ros.org/melodic/Installation/Ubuntu)
 
-**NOTE: during installation of any of the software, if it is asked to install opencv just find opencv4 in jetson nano and change path to the same. Also refer to [this](https://github.com/ros-perception/vision_opencv/issues/345) repository for more information** 
+
+## Building opencv on source with CUDA flag
+
+I have tried OpenCV 4.5.1 for this project. However, you can test other versions as well. Please refer to [Q engineering blog](https://qengineering.eu/install-opencv-4.5-on-jetson-nano.html) which I have followed for this purpose. 
+
+But before that you need some tools to monitor GPU usage on nano. I have used [JTOP](https://github.com/rbonghi/jetson_stats) for this purpose. 
+
+### JTOP
+
+Install pip on jetson nano 
+
+```
+$ wget https://bootstrap.pypa.io/get-pip.py
+$ sudo python3 get-pip.py
+$ rm get-pip.py
+```
+
+Now install jtop using pip 
+
+```
+$ sudo -H pip install -U jetson-stats
+```
+
+To see if it is install just type ``` jtop ``` and hit run.
+
+Now, you can start building opencv. But before that ensure that you have lots of Disk space (atleast 13gb of empty space). It is higly recomended that you should not have anything 
+in your jetson nano before following this guide.
+
+### Enlarge memory swap
+
+You can do these either in traditional way or using jtop 
+
+#### traditional way
+
+```
+$ sudo apt-get update
+$ sudo apt-get upgrade
+$ sudo apt-get install nano
+$ sudo apt-get install dphys-swapfile
+$ sudo nano /sbin/dphys-swapfile
+# CONF_MAXSWAP=6074
+# reboot afterwards
+$ sudo reboot.
+```
+
+Trust me, the nano was suffering with swap size of 4096 hence, use 6074 just to be safe.
+
+#### jtop way
+
+In page 4 MEM:
+
+* Select s to Enable extra swap
+* Press + Increase the swap size and increase upto 6 gb. 
+* ``` sudo reboot ```
+
+Type ``` free -m ``` to see if it was sucesful.
+
+#### install dependencies
+
+```
+$ sudo ldconfig
+# third-party libraries
+$ sudo apt-get install build-essential cmake git unzip pkg-config zlib1g-dev
+$ sudo apt-get install libjpeg-dev libjpeg8-dev libjpeg-turbo8-dev
+$ sudo apt-get install libpng-dev libtiff-dev libglew-dev
+$ sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev
+$ sudo apt-get install libgtk2.0-dev libgtk-3-dev libcanberra-gtk*
+$ sudo apt-get install python-dev python-numpy python-pip
+$ sudo apt-get install python3-dev python3-numpy python3-pip
+$ sudo apt-get install libxvidcore-dev libx264-dev libgtk-3-dev
+$ sudo apt-get install libtbb2 libtbb-dev libdc1394-22-dev libxine2-dev
+$ sudo apt-get install gstreamer1.0-tools libgstreamer-plugins-base1.0-dev
+$ sudo apt-get install libgstreamer-plugins-good1.0-dev
+$ sudo apt-get install libv4l-dev v4l-utils v4l2ucp qv4l2
+$ sudo apt-get install libtesseract-dev libxine2-dev libpostproc-dev
+$ sudo apt-get install libavresample-dev libvorbis-dev
+$ sudo apt-get install libfaac-dev libmp3lame-dev libtheora-dev
+$ sudo apt-get install libopencore-amrnb-dev libopencore-amrwb-dev
+$ sudo apt-get install libopenblas-dev libatlas-base-dev libblas-dev
+$ sudo apt-get install liblapack-dev liblapacke-dev libeigen3-dev gfortran
+$ sudo apt-get install libhdf5-dev libprotobuf-dev protobuf-compiler
+$ sudo apt-get install libgoogle-glog-dev libgflags-dev
+```
+
+#### Install opencv source file
+
+```
+$ cd ~
+$ wget -O opencv.zip https://github.com/opencv/opencv/archive/4.5.1.zip
+$ wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.5.1.zip
+# unpack
+$ unzip opencv.zip
+$ unzip opencv_contrib.zip
+# some administration to make live easier later on
+$ mv opencv-4.5.1 opencv
+$ mv opencv_contrib-4.5.1 opencv_contrib
+# clean up the zip files
+$ rm opencv.zip
+$ rm opencv_contrib.zip
+```
+
+make a build directory
+
+```
+$ cd ~/opencv
+$ mkdir build
+$ cd build
+```
+#### Build and make
+
+Till now you have just installed important dependencies for opencv, now at this step the real trouble begins
+
+Before that you have to specify where the nvcc is located. You have to do this by making some change in the bashrc file:
+
+```
+$ sudo nano ~/.bashrc
+# Copy below stuff into bashrc file
+export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64\
+                         ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+```
+
+cmake step 
+
+```
+$cd ~/opencv/build
+$ cmake -D CMAKE_BUILD_TYPE=RELEASE \
+-D CMAKE_INSTALL_PREFIX=/usr \
+-D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib/modules \
+-D EIGEN_INCLUDE_PATH=/usr/include/eigen3 \
+-D WITH_OPENCL=OFF \
+-D WITH_CUDA=ON \
+-D CUDA_ARCH_BIN=5.3 \
+-D CUDA_ARCH_PTX="" \
+-D WITH_CUDNN=ON \
+-D WITH_CUBLAS=ON \
+-D ENABLE_FAST_MATH=ON \
+-D CUDA_FAST_MATH=ON \
+-D OPENCV_DNN_CUDA=ON \
+-D ENABLE_NEON=ON \
+-D WITH_QT=OFF \
+-D WITH_OPENMP=ON \
+-D BUILD_TIFF=ON \
+-D WITH_FFMPEG=ON \
+-D WITH_GSTREAMER=ON \
+-D WITH_TBB=ON \
+-D BUILD_TBB=ON \
+-D BUILD_TESTS=OFF \
+-D WITH_EIGEN=ON \
+-D WITH_V4L=ON \
+-D WITH_LIBV4L=ON \
+-D OPENCV_ENABLE_NONFREE=ON \
+-D INSTALL_C_EXAMPLES=OFF \
+-D INSTALL_PYTHON_EXAMPLES=OFF \
+-D BUILD_NEW_PYTHON_SUPPORT=ON \
+-D BUILD_opencv_python3=TRUE \
+-D OPENCV_GENERATE_PKGCONFIG=ON \
+-D BUILD_EXAMPLES=OFF ..
+```
+before moving to the next step it is higly recomended that you put the fan at maximum speed (you can do it using jtop) and open system monitor (app in jetson nano to see cpu 
+utilization and memory use) and jtop. It is highly possible that system might freeze but be patient. This is the step where you should monitor the system heavily. It may take
+upto one hour(not less than one hour might take more than thi) for this step.
+
+```
+$ make -j4
+```
+#### Final touch
+
+If it was succesful without any error then you should feel lucky! This step still make me anxious. Now you can remove the old opencv
+
+```
+$ sudo rm -r /usr/include/opencv4/opencv2
+$ sudo make install
+$ sudo ldconfig
+# cleaning (frees 300 MB)
+$ make clean
+$ sudo apt-get update
+```
+
+Now check if it is properly installed:
+
+```
+$ python3
+$ import cv2
+$ exit()
+```
+
+If it was sucesful then Hurray!!! and also check jtop info section, now it should show something like " opencv cuda compiled:YES ".
+
+If you do not intend to use opencv with C/C++ and if you want to use opencv for anyother purposes except for described in this document you should definetly read **cleaning**
+section of [QEngineering](https://qengineering.eu/install-opencv-4.5-on-jetson-nano.html) blog before performing the below step:
+
+```
+$ sudo rm -rf ~/opencv
+$ sudo rm -rf ~/opencv_contrib
+```
 
 ## Performance
 
