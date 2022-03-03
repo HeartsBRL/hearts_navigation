@@ -1,0 +1,11 @@
+There might be some lag in the rtabmapviz when camera is connected to pi. 
+Reducing FPS seems to be a good solution. this can be done using the following
+command during launch of realsense sdk ros wrapper from terminal:
+
+depth_fps:=15 infra_fps:=15
+
+Remember default parameters for both of the parameters are 30fps (atleast 
+for one of them) 
+
+least could be 6 but never try that. actually never go below 15 it is 
+recomended

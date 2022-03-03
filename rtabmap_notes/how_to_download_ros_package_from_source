@@ -1,0 +1,16 @@
+Step 1: Find suitaible branch for your ros version (for most of the cases master branch is okay)
+
+step 2: In the scr of catkin_ws of ros clone the source using the following command
+git clone -b <branch-name(like noetic-devel)> <git-site(like //github.com/....)>
+
+step 3: cd ~/catkin_ws
+
+step 4: catkin_make
+
+step 5: source it 
+
+source ~/catkin_ws/devel/setup.bash
+
+step 6: ensure that you do not need to do it again and again:
+
+echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
