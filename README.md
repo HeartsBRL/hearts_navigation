@@ -6,7 +6,6 @@ In order to acieve this, we need to achieve following goals, which are explained
 
 * Building Opencv with CUDA on source
 * Building Realsense SDK on source (this was tested on the platform which is described in the **hardware**.
-* Building image transport and cv bridge ros package from source.
 
 
 ## Requirements 
@@ -144,6 +143,8 @@ $ sudo nano ~/.bashrc
 export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64\
                          ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+# after exiting from nano source the bash file
+$ source ~/.bashrc
 ```
 
 cmake step 
@@ -219,6 +220,144 @@ section of [QEngineering](https://qengineering.eu/install-opencv-4.5-on-jetson-n
 ```
 $ sudo rm -rf ~/opencv
 $ sudo rm -rf ~/opencv_contrib
+```
+## Building Realsense SDK from source 
+
+Refer to [Official GitHub repo](https://github.com/IntelRealSense/librealsense/blob/master/doc/installation_jetson.md) for further refernce for building it from source on jetson 
+nano. We are building using Native backend for realsense sdk because it is recomended in the official documentation. If you want to use multiple camera then you should try RSUSB 
+backend. As per official documentation and to best of my knowledge this was not tested on Jetson nano before. However, I think it is possible on latest version of jetpack which is used in this project. Due to this reason, It takes a lot of computational power to do so. One of the other reason that we increased the swap size to such extend was to make sure the system won't crash while this process as well. 
+
+Before that you should verify that it has atleast 2.5Gb of free space and also ensure that other usb devices are not connected (except for essentials like wifi, mouse and keyboard).
+
+Download the source file from GitHub
+
+```
+$ cd ~
+$ git clone https://github.com/IntelRealSense/librealsense.git
+# Navigate to librealsense directory that was just created
+$ cd librealsense/scripts
+# now run the patch-realsense-ubuntu-L4T.sh  file
+$ ./patch-realsense-ubuntu-L4T.sh  
+```
+
+Install missing dependencies and make build directory
+
+```
+$ sudo apt-get install git libssl-dev libusb-1.0-0-dev libudev-dev pkg-config libgtk-3-dev -y
+./scripts/setup_udev_rules.sh  
+$ mkdir build 
+$ cd build  
+```
+
+Now again, before this step just open the monitoring tools that you used the last section:
+
+```
+$ cmake .. -DBUILD_EXAMPLES=true -DCMAKE_BUILD_TYPE=release -DFORCE_RSUSB_BACKEND=false -DBUILD_WITH_CUDA=true 
+$ make -j4 
+$ sudo make install
+```
+As you can see the cuda flag is already on and due to the change in the source file you should not get any error. However, if you get any error regarding Cuda/nvcc not found i would suggest try different methods provided in [cuda community](https://forums.developer.nvidia.com/t/cuda-nvcc-not-found/118068).
+
+If you are lucky and your system didn't crashed then try connecting the camera and running realsense sdk with ``` realsense-viewer```.
+
+If you open ```jtop``` then you will observe that as GPU usage increases load on cpu decreases, which suggest that it is using GPU properly. 
+
+## ROS 
+
+If you have completed above steps then congrats! You have completed the hardest parts. Now you only need to install ROS and simple stuffs for this thing to function.
+
+### Install ROS Melodic
+
+Due to Ubuntu version of Nano you can only use Melodic on Nano. But thats not bad. For installing Melodic on Nano you can refer to [Stereo lab's](https://www.stereolabs.com/blog/ros-and-nvidia-jetson-nano/) guide for reference. 
+
+Seting Up the keys:
+
+```
+$ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+$ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+$ sudo apt update
+```
+
+Now install ROS Melodic
+
+```
+$ sudo apt install ros-melodic-desktop
+```
+
+make some changes in the bashrc and source it
+
+```
+$ echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc 
+$ source ~/.bashrc
+```
+Install rosdep
+
+```
+$ sudo apt install python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential
+$ sudo rosdep init 
+$ rosdep update
+```
+
+to check if it is installed properly, run ```roscore```.
+
+Next step is to build catkin ws:
+
+```
+$ mkdir -p ~/catkin_ws/src
+$ cd ~/catkin_ws/
+$ catkin_make
+$ source devel/setup.bash
+```
+### ROS wrapper for Realsense SDK
+
+The first thing you should do after installing ROS is to build a ros wrapper for Realsense SDK you can find the official document [here](https://github.com/IntelRealSense/realsense-ros).
+
+Change your directory to catkin:
+
+```
+$ cd ~/catkin_ws/src/
+$ git clone https://github.com/IntelRealSense/realsense-ros.git
+$ cd realsense-ros/
+$ git checkout `git tag | sort -V | grep -P "^2.\d+\.\d+" | tail -1`
+cd ..
+```
+
+Don't forget to install ddynamic_reconfigure and other dependent package as mentioned in the [official github](https://github.com/IntelRealSense/realsense-ros) repository otherwise you will get error while catkin_make step.
+
+```
+$ sudo apt-get install ros-melodic-ddynamic_reconfigure
+```
+
+The real fun begans now (catkin make step):
+
+```
+$ cd ~/catkin_ws
+$ catkin_make clean
+$ catkin_make -DCATKIN_ENABLE_TESTING=False -DCMAKE_BUILD_TYPE=Release
+$ catkin_make install
+```
+
+Make changes in the bashrc file and souce it:
+
+```
+$ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+$ source ~/.bashrc
+```
+You can check if everything is installed properly by using this command:
+
+```
+roslaunch realsense2_camera rs_camera.launch
+```
+open ```rviz``` and change fixed frame to camera link and chose any topic (first try using /camera/color/image_raw topic) and see if it works fine. 
+
+If it works then congrats! Honestly, you have done most of the work.
+
+### Install RTABmap
+
+I have just installed rtabmap using binary file because i don't see any reason to install RTABMAP from source. Everything that can use GPU is already CUDA optimized. But i would recomend giving it a try.
+
+```
+$ sudo apt-get install ros-melodic-rtabmap-ros
 ```
 
 ## Performance
