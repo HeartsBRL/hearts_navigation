@@ -418,3 +418,17 @@ If you want to see the results, you can use rtabmap-databaseviewer. If you have 
 ``` rtabmap-databaseViewer ~/.ros/rtabmap.db ```
 
 an window should be open where you can generate point cloud and see the maps.
+
+### Start where you left
+
+Delete or remove .db extension folder from .ros folder and run this code:
+
+```
+roslaunch rtabmap_ros rtabmap.launch \
+    depth_topic:=/camera/aligned_depth_to_color/image_raw \
+    rgb_topic:=/camera/color/image_raw \
+    camera_info_topic:=/camera/color/camera_info \
+    approx_sync:=false \
+    wait_imu_to_init:=true \
+    imu_topic:=/rtabmap/imu  rtabmapviz:=false  rviz:=true
+```
