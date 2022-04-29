@@ -410,3 +410,11 @@ $ rosrun imu_filter_madgwick imu_filter_node \
 Once the rviz is on select Map cloud and map graph. In the map cloud download map to load all the points in the rviz. It would show some error initially but after sometime it should load. 
 
 If you want to not start mapping with fresh map remove ``` rtabmap_args:="--delete_db_on_start --Optimizer/GravitySigma 0.3" ```
+
+### Analysing Results
+
+If you want to see the results, you can use rtabmap-databaseviewer. If you have results from jetson nano, copy the results saved in .ros folder with extension of .db (.ros is a hidden folder) and paste it in the same folder in the laptop, then;
+
+``` rtabmap-databaseViewer ~/.ros/rtabmap.db ```
+
+an window should be open where you can generate point cloud and see the maps.
